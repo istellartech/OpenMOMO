@@ -65,3 +65,7 @@ telem3_*.csvについて
 	・telem3_241.csv: GPSの情報からOBCがIIP位置を計算したもの
 	・telem3_firefly_a.csv: GPS_AのGPS情報
 	・telem3_firefly_b.csv: GPS_BのGPS情報
+
+etc
+	・attitude_plan_nominal.csv: 姿勢制御入力値
+	・enc2deg.csv: ジンバルのエンコーダ値からジンバル角度への変換テーブル
