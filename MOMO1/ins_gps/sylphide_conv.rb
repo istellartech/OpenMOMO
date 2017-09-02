@@ -131,9 +131,33 @@ posvel2ubx = proc{|out|
       out.print ubx_velned
     }
   }
-  
   out
 }
 
 #inertial2imu_csv.call($stdout)
-posvel2ubx.call($stdout)
+#posvel2ubx.call($stdout)
+
+require 'tempfile'
+data_mod = Hash[*({:inertial => inertial2imu_csv, :posvel => posvel2ubx}.collect{|k, f|
+  out = f.call(Tempfile::open(File::basename(__FILE__, '.*')))
+  out.close
+  [k, out]
+}.flatten(1))]
+
+$stderr.puts data_mod.inspect
+
+require 'log_mixer'
+log_prop = {
+  :readers => [
+    IMU_CSV::new(data_mod[:inertial].open, {
+      :acc_units => [9.80665] * 3, # G => m/s
+      :acc_bias => [1 << 23] * 3,
+      :acc_sf => [(1<<23).to_f / (9.80665 * 4)] * 3, # 4[G] full scale; [1/(m/s^2)]
+      :gyro_units => [Math::PI / 180] * 3, # dps => rad/s
+      :gyro_bias => [1 << 23] * 3,
+      :gyro_sf => [(1<<23).to_f / (Math::PI / 180 * 500)] * 3, # 500[dps] full scale; [1/(rad/s)]
+    }),
+    GPS_UBX::new(data_mod[:posvel].open), 
+  ],
+}
+$log_mix.call(log_prop.merge({:out => $stdout}))
