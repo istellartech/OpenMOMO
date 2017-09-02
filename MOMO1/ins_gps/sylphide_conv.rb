@@ -11,6 +11,7 @@ $stderr.puts " Usage: #{$0} [--key[=value]]"
 }
 
 opt = {
+  :basetime => "2017-07-30 16:31:00 +0900", # according to MOMO1 launch report
   :prefix => :telem1,
   :inertial => 'sensors.csv',
   :posvel => 'ecef_ecefvel.csv',
@@ -29,6 +30,13 @@ opt[:data_dir] ||= File::join(File::dirname(__FILE__), '..', 'csv', opt[:prefix]
 
 $stderr.puts "options: #{opt}"
 
+base_week, base_itow = proc{
+  require 'time'
+  require 'gpstime'
+  t = GPSTime::itow(Time::parse(opt[:basetime]))
+  [t[0] * 1024 + t[1], t[2]]
+}.call
+
 inertial2imu_csv = proc{|out|
   # read CSV and write [t,accelX,Y,Z,omegaX,Y,Z]
   open(File::join(opt[:data_dir], opt[:inertial])){|io|
@@ -40,10 +48,9 @@ inertial2imu_csv = proc{|out|
       header.index(k)
     }
     io.each{|line|
-      values = line.chomp.split(/, */)
-      out.puts index.collect{|i|
-        values[i].to_f
-      }.join(',')
+      values = line.chomp.split(/, */).values_at(*index).collect{|v| v.to_f}
+      values[0] += base_itow
+      out.puts values.join(',')
     }
   }
   out
@@ -67,7 +74,7 @@ posvel2ubx = proc{|out|
     
     io.each{|line|
       values = line.chomp.split(/, */)
-      t = values[index_t].to_f
+      t = values[index_t].to_f + base_itow
       pos_ecef, vel_ecef = [index_pos, index_vel].collect{|index|
         System_XYZ::new(*(values.values_at(*index).collect{|str| str.to_f}))
       }
@@ -81,7 +88,7 @@ posvel2ubx = proc{|out|
       ubx_sol = [0xB5, 0x62, 0x01, 0x06, 52].pack('c4v') + itow
       ubx_sol << [ \
           0, # frac
-          0, #base_gpstime[0], # week
+          base_week, # week
           0x03, # 3D-Fix
           0x0D, # GPSfixOK, WKNSET, TOWSET
           pos_ecef.to_a.collect{|v| (v * 1E2).to_i}, # ECEF_XYZ [cm]
