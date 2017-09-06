@@ -149,13 +149,13 @@ $stderr.puts data_mod.inspect
 require 'log_mixer'
 log_prop = {
   :readers => [
-    IMU_CSV::new(data_mod[:inertial].open, {
+    IMU_CSV::new(data_mod[:inertial].open, { # Simulate MPU-6000/9250 of NinjaScan (FS: 8G, 2000dps)
       :acc_units => [9.80665] * 3, # G => m/s
-      :acc_bias => [1 << 23] * 3,
-      :acc_sf => [(1<<23).to_f / (9.80665 * 4)] * 3, # 4[G] full scale; [1/(m/s^2)]
+      :acc_bias => [1 << 15] * 3, # Full scale is 16 bits
+      :acc_sf => [(1<<15).to_f / (9.80665 * 8)] * 3, # 8[G] full scale; [1/(m/s^2)]
       :gyro_units => [Math::PI / 180] * 3, # dps => rad/s
-      :gyro_bias => [1 << 23] * 3,
-      :gyro_sf => [(1<<23).to_f / (Math::PI / 180 * 500)] * 3, # 500[dps] full scale; [1/(rad/s)]
+      :gyro_bias => [1 << 15] * 3, # Full scale is 16 bits
+      :gyro_sf => [(1<<15).to_f / (Math::PI / 180 * 2000)] * 3, # 2000[dps] full scale; [1/(rad/s)]
     }),
     GPS_UBX::new(data_mod[:posvel].open), 
   ],
