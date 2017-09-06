@@ -11,7 +11,7 @@ $stderr.puts " Usage: #{$0} [--key[=value]]"
 }
 
 opt = {
-  :basetime => "2017-07-30 16:31:00 +0900", # according to MOMO1 launch report
+  :basetime => "2017-07-30 16:31:44 +0900", # according to https://github.com/istellartech/OpenMOMO/issues/2
   :prefix => :telem1,
   :inertial => 'sensors.csv',
   :posvel => 'ecef_ecefvel.csv',
