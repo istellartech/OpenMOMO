@@ -1,5 +1,6 @@
 概要
 	T+66秒でUHFテレメトリの通信途絶
+	打上げ時刻　2017年07月30日 日曜日 16時30分44秒
 
 telem1/telem1_*.csv
 	・UHFテレメトリ ハードウエア受信機で受信したもの
@@ -69,3 +70,7 @@ telem3_*.csvについて
 etc
 	・attitude_plan_nominal.csv: 姿勢制御入力値
 	・enc2deg.csv: ジンバルのエンコーダ値からジンバル角度への変換テーブル
+
+機体姿勢については座標系は右手系。
+リフトオフ前のEast/North/Upに対して機体座標系（加速度・ジャイロセンサの軸方向：センサ座標系と一致させています）を合わせています。
+/notebook の中の coordinate_before_launch.png を参照。
