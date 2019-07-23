@@ -18,8 +18,8 @@ opt = {
 }
 
 ARGV.reject!{|arg|
-  next false unless arg =~ /--([^=]+)/
-  opt[$1.to_sym] = ($'[0] == '=' ? $' : true)
+  next false unless arg =~ /--([^=]+)=?/
+  opt[$1.to_sym] = $'
   true
 }
 
