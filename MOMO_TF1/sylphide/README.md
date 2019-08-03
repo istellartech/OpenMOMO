@@ -9,7 +9,7 @@ $ ruby sylphide_conv.rb > log.dat
 
 * The default is to use telem1_sensors.csv and telem1_ecef_ecefvel.csv to generate log.dat.
 * If you want to change another source except for telem1, please use prefix option as "--prefix=telem2" for telem2 case after "sylphide_conv.rb".
-* Other options are (他のオプションは)
+* Other options are
   * "--inertial=sensors.csv" if you want to change inertial CSV file name (default: sensors.csv). 
   * "--posvel=ecef_ecefvel.csv" if you want to change GPS CSV file name (default: ecef_ecefvel.csv).
 
