@@ -102,3 +102,6 @@ ENV/
 MOMO1/csv/telem1/Iconr
 MOMO1/csv/telem2/Iconr
 MOMO1/csv/telem3/Iconr
+
+# Mac
+.DS_store
