@@ -30,11 +30,11 @@ opt[:data_dir] ||= File::join(File::dirname(__FILE__), '..', 'csv', opt[:prefix]
 
 $stderr.puts "options: #{opt}"
 
-base_week, base_itow = proc{
+base_week, base_itow, leapsec = proc{
   require 'time'
   require 'gpstime'
   t = GPSTime::itow(Time::parse(opt[:basetime]))
-  [t[0] * 1024 + t[1], t[2]]
+  [t[0] * 1024 + t[1], t[2], t[3]]
 }.call
 
 inertial2imu_csv = proc{|out|
@@ -72,6 +72,26 @@ posvel2ubx = proc{|out|
       k_s.collect{|k| header.index(k)}
     }
     
+    timegps = proc{
+      t_previous = 0
+      proc{|t|
+        t_int = t.to_i
+        next if t_int == t_previous
+        t_previous = t_int
+        
+        ubx_time = [0xB5, 0x62, 0x01, 0x20, 16, t_int * 1000].pack('c4vV')
+        ubx_time << [
+            0, # Nanoseconds remainder
+            base_week, # GPS week
+            leapsec, # Leap sec
+            0x07, # Valid
+            10_000, # TAcc [ns] => 10 us
+            ].pack('l<s<cCV')
+        ubx_time << UBX::checksum(ubx_time.unpack('c*'), 2..-1).pack('c2')
+        out.print ubx_time
+      }
+    }.call
+    
     io.each{|line|
       values = line.chomp.split(/, */)
       t = values[index_t].to_f + base_itow
@@ -81,12 +101,15 @@ posvel2ubx = proc{|out|
       pos_llh = pos_ecef.llh
       vel_enu = System_ENU.relative_rel(vel_ecef, pos_ecef)
     
-      # 0x01 0x06/0x02/0x12 が必要
+      # 0x01 0x20/0x06/0x02/0x12 が必要
       itow = [(1E3 * t).to_i].pack('V')
+      
+      # NAV-TIMEGPS (0x01-0x20)
+      timegps.call(t)
       
       # NAV-SOL (0x01-0x06)
       ubx_sol = [0xB5, 0x62, 0x01, 0x06, 52].pack('c4v') + itow
-      ubx_sol << [ \
+      ubx_sol << [
           0, # frac
           base_week, # week
           0x03, # 3D-Fix
@@ -101,7 +124,7 @@ posvel2ubx = proc{|out|
       
       # NAV-POSLLH (0x01-0x02)
       ubx_posllh = [0xB5, 0x62, 0x01, 0x02, 28].pack('c4v') + itow
-      ubx_posllh << [ \
+      ubx_posllh << [
           (pos_llh.lng / Math::PI * 180 * 1E7).to_i, # 経度 [1E-7 deg]
           (pos_llh.lat / Math::PI * 180 * 1E7).to_i, # 緯度 [1E-7 deg]
           (pos_llh.h * 1E3).to_i, # 楕円高度 [mm]

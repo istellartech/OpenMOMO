@@ -36,15 +36,13 @@ class GPSTime
   def GPSTime::itow(utc = Time::now)
     sec = utc - ZERO
     return nil if sec < 0
-    UTC2GPST_DELTA.each{|check_t, delta| 
-      if utc > check_t then
-        sec += delta
-        break
-      end
-    }
+    leapsec = (UTC2GPST_DELTA.find{|check_t, delta|
+      utc > check_t
+    } || [0, 0])[1]
+    sec += leapsec
     cycle, sec = sec.divmod(CYCLE_SEC)
     week, sec = sec.divmod(WEEK_SEC)
-    [cycle, week, sec]
+    [cycle, week, sec, leapsec]
   end
   
   GPST2UTC_DELTA = UTC2GPST_DELTA.collect{|utc, delta|
@@ -53,13 +51,9 @@ class GPSTime
   
   def GPSTime::utc(gpstime)
     sec = gpstime[0] * CYCLE_SEC + gpstime[1] * WEEK_SEC + gpstime[2]
-    GPST2UTC_DELTA.each{|check_t, delta| 
-      if sec > check_t then
-        sec -= delta
-        break
-      end
-    }
-    ZERO + sec
+    ZERO + sec - (GPST2UTC_DELTA.find{|check_t, delta|
+      sec > check_t
+    } || [0, 0])[1]
   end
 end
 
