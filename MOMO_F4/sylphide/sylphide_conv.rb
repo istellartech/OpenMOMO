@@ -17,8 +17,8 @@ ARGV.reject!{|arg|
   true
 }
 
-system(
-    ([File::join(File::dirname($0), '..', '..', 'MOMO_F3', 'sylphide', 'sylphide_conv.rb')] \
+cmd = (['ruby', File::join(File::dirname($0), '..', '..', 'MOMO_F3', 'sylphide', 'sylphide_conv.rb')] \
     + opt.collect{|k, v|
       "--#{k}='#{v}'"
-    } + ARGV).join(' '))
+    } + ARGV).join(' ')
+raise("Runtime error! #{cmd}") unless system(cmd)
