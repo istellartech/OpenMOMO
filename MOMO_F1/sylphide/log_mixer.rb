@@ -227,7 +227,7 @@ src = {
 }
 $log_mix.call({:readers => [
   IMU_CSV::new(open(src[:imu])),
-  GPS_UBX::new(open(src[:gps])), 
+  GPS_UBX::new(open(src[:gps], 'rb')), 
 ]})
 
 end
