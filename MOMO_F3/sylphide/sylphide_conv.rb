@@ -51,7 +51,7 @@ inertial_csv = proc{
   }
 }.call
 
-opt[:inertial] = Pathname::new(inertial_csv.path).relative_path_from(opt[:data_dir]).to_s
+opt[:inertial] = Pathname::new(inertial_csv.path).relative_path_from(Pathname::new(opt[:data_dir])).to_s
 
 pos_vel_csv = proc{|dst|
   Tempfile::open(File::basename(opt[:posvel], '.*'), opt[:data_dir]){|dst|
@@ -64,10 +64,11 @@ pos_vel_csv = proc{|dst|
   }
 }.call
 
-opt[:posvel] = Pathname::new(pos_vel_csv.path).relative_path_from(opt[:data_dir]).to_s
+opt[:posvel] = Pathname::new(pos_vel_csv.path).relative_path_from(Pathname::new(opt[:data_dir])).to_s
 
-system(
-    ([File::join(File::dirname($0), '..', '..', 'MOMO_F1', 'sylphide', 'sylphide_conv.rb')] \
+cmd = (
+    (['ruby', File::join(File::dirname($0), '..', '..', 'MOMO_F1', 'sylphide', 'sylphide_conv.rb')] \
     + opt.collect{|k, v|
       "--#{k}='#{v}'"
     } + ARGV).join(' '))
+raise("Runtime error! #{cmd}") unless system(cmd)

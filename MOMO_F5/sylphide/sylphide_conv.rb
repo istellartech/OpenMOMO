@@ -2,8 +2,8 @@
 # coding: cp932
 
 opt = {
-  :data_dir => File::join(File::dirname(__FILE__), '..', 'telemetry_csv', 'C_band', 'PC1'),
-  :basetime => "2019-07-17 16:20:00 +0900", # according to http://www.istellartech.com/7hbym/wp-content/uploads/2019/07/IST-PressRelease_2019072901.pdf
+  :data_dir => File::join(File::dirname(__FILE__), '..', 'telemetry_csv', 'C_band'),
+  :basetime => "20120-06-14 05:15:00 +0900", # according to http://www.istellartech.com/7hbym/wp-content/uploads/2020/06/d1db3cdf9f6d98cad79b276454879ce3.pdf
   :inertial_prefix => 'gyro_5f',
   :posvel => 'gps_a.csv',
   :prefix => '',

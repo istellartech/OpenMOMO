@@ -162,7 +162,7 @@ posvel2ubx = proc{|out|
 
 require 'tempfile'
 data_mod = Hash[*({:inertial => inertial2imu_csv, :posvel => posvel2ubx}.collect{|k, f|
-  out = f.call(Tempfile::open(File::basename(__FILE__, '.*')))
+  out = f.call(Tempfile::open(File::basename(__FILE__, '.*'), mode: File::BINARY))
   out.close
   [k, out]
 }.flatten(1))]
@@ -183,4 +183,5 @@ log_prop = {
     GPS_UBX::new(data_mod[:posvel].open), 
   ],
 }
+STDOUT.binmode
 $log_mix.call(log_prop.merge({:out => $stdout}))
